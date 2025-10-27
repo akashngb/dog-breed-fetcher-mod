@@ -19,6 +19,8 @@ public class CachingBreedFetcher implements BreedFetcher {
         }
 
         try {
+            callsMade++;  // increment BEFORE calling underlying fetcher
+            List<String> subBreeds = fetcher.getSubBreeds(breed);
             // Fetch from the underlying fetcher
             List<String> subBreeds = fetcher.getSubBreeds(breed);
             callsMade++;
@@ -28,6 +30,7 @@ public class CachingBreedFetcher implements BreedFetcher {
 
             return subBreeds;
         } catch (BreedNotFoundException e) {
+            // Do NOT cache failures
             // Do NOT cache if breed not found
             throw e;
         }
