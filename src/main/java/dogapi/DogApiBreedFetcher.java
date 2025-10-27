@@ -31,5 +31,35 @@ public class DogApiBreedFetcher implements BreedFetcher {
         //      as well as the code for parsing JSON responses.
         // return statement included so that the starter code can compile and run.
         return new ArrayList<>();
+    public List<String> getSubBreeds(String breed) {
+        Request request = new Request.Builder()
+                .url("https://dog.ceo/api/breed/hound/list")
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful() || response.body() == null) {
+                throw new BreedNotFoundException(breed);
+            }
+
+            String responseBody = response.body().string();
+            JSONObject json = new JSONObject(responseBody);
+
+            String status = json.optString("status", "error");
+            if (!status.equals("success")) {
+                throw new BreedNotFoundException(breed);
+            }
+
+            JSONArray subBreedsArray = json.getJSONArray("message");
+            List<String> subBreeds = new ArrayList<>();
+
+            for (int i = 0; i < subBreedsArray.length(); i++) {
+                subBreeds.add(subBreedsArray.getString(i));
+            }
+
+            return subBreeds;
+        } catch (IOException e) {
+            // Wrap any IO/network failure as a BreedNotFoundException
+            throw new BreedNotFoundException(breed);
+        }
     }
 }
